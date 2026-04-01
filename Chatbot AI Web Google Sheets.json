@@ -1,0 +1,169 @@
+{
+  "name": "Chatbot AI Web Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Kamu adalah asisten pelatihan NF Academy, yang siap menjawab pertanyaan dengan baik sesuai dengan bahasa yang digunakan penanya.\n\nJawablah pertanyaan tentang produk, deskripsi/uraian, biaya/harga, dan tempat/lokasi pelatihan sesuai dengan informasi yang tersedia dalam tool Get row(s) in sheet in google sheets.\n\nJika kamu tidak menemukan informasi produk, harga, dan tempat pelatihan, jangan mengarang jawaban. Berikan jawaban, \"Maaf, saya belum memiliki data yang anda minta. Silakan lihat web nfacademy.id\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        240,
+        -32
+      ],
+      "id": "8b859767-3a50-400f-a934-d718463440aa",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        176,
+        192
+      ],
+      "id": "63230931-3059-4e88-9b8d-9131b6a7c29a",
+      "name": "Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "jd44egcEJ2nQ48iO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1IbitVRDjqGiDuXsu30l2zcudISy7uQO5ZiJ2zeCvvXQ",
+          "mode": "list",
+          "cachedResultName": "pelatihan",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IbitVRDjqGiDuXsu30l2zcudISy7uQO5ZiJ2zeCvvXQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IbitVRDjqGiDuXsu30l2zcudISy7uQO5ZiJ2zeCvvXQ/edit#gid=0"
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        464,
+        192
+      ],
+      "id": "949e66a7-0456-491c-8149-9295c212fdde",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dyXc2Ep0YHTVLEDE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Halo Kawann 👋\nNamaku Kevin. Ada yang bisa kubantu?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "77529add-c5f6-4fe9-9cfc-3d884ac7da84",
+      "name": "When chat message received",
+      "webhookId": "b14e8625-fd59-41bd-9fb5-16310fbb2f7c"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        192
+      ],
+      "id": "1dfc4be0-d0b9-4c29-a899-c2f50ea81050",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "785711f7-2d56-4208-b056-b5bd7dc836b5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1b1dd58ee2ed3ec58599a56b628cfdf30aa70f1e4cc70b047799ef1650afe0eb"
+  },
+  "id": "8tFrvMlomE8PK6dk",
+  "tags": []
+}
