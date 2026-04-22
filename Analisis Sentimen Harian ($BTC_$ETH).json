@@ -1,0 +1,433 @@
+{
+  "name": "Analisis Sentimen Harian ($BTC_$ETH)",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the sentiment of the following tweet. Respond ONLY with ONE word: 'Positive', 'Negative', or 'Neutral'.\n\nTweet:\n{{ $json.text }}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        96
+      ],
+      "id": "fe72ea8e-9a58-4aa9-9284-74895e0d8b6c",
+      "name": "Analisis Sentimen"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1a1W95cZXo5eMOMRYknbUYT53Tu7c4hyCD1OQ_3YHv4I"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Data Mentah",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1a1W95cZXo5eMOMRYknbUYT53Tu7c4hyCD1OQ_3YHv4I/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Sentiment": "={{ $json.text}}",
+            "Judul Berita": "={{ $('RSS Read').item.json.title }}",
+            "Link Berita": "={{ $('RSS Read').item.json.link }}",
+            "Waktu": "={{ $now.toFormat(\"yyyy-MM-dd HH:mm:ss\") }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Judul Berita",
+              "displayName": "Judul Berita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link Berita",
+              "displayName": "Link Berita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tweet_Text",
+              "displayName": "Tweet_Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Waktu",
+              "displayName": "Waktu",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        528,
+        96
+      ],
+      "id": "b494daa5-9539-4ee4-ab25-f23f76b5ab7d",
+      "name": "Penyimpanan Hasil",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RdX1iHvQtNgfwgiy",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        96
+      ],
+      "id": "dd4c6374-7717-45e2-8a7b-ee3d62dd0cd4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://cointelegraph.com/rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -208,
+        96
+      ],
+      "id": "01884740-980f-429e-8f14-0fdca3768946",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        96
+      ],
+      "id": "294baf8f-3ef7-4837-9eb2-2983be9273b3",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "model": "xiaomi/mimo-v2-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -80
+      ],
+      "id": "ad14954f-1f7c-4019-9308-dc5323bc7047",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "gXP8wizmYZb95bZl",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        432
+      ],
+      "id": "fe2b2fb2-d7df-4be3-9620-5178710e8212",
+      "name": "Tiap jam 7 pagi"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1a1W95cZXo5eMOMRYknbUYT53Tu7c4hyCD1OQ_3YHv4I",
+          "mode": "list",
+          "cachedResultName": "$BTC dan $ETH Sentimen Media Sosial",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1a1W95cZXo5eMOMRYknbUYT53Tu7c4hyCD1OQ_3YHv4I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Data Mentah",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1a1W95cZXo5eMOMRYknbUYT53Tu7c4hyCD1OQ_3YHv4I/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -208,
+        432
+      ],
+      "id": "4c53f0c9-1617-44a0-a3a0-06e9e8e2830b",
+      "name": "Baca Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RdX1iHvQtNgfwgiy",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ambil semua baris dari node \"Google Sheets\"\n// **Pastikan nama node Anda adalah \"Google Sheets\"**\nconst items = $items(\"Baca Data\");\n\nlet positive = 0;\nlet negative = 0;\nlet neutral = 0;\nlet total = 0;\n\n// Loop melalui setiap baris\nfor (const item of items) {\n  // Ambil nilai dari kolom \"Sentiment\"\n  const sentiment = item.json.Sentiment;\n  \n  if (sentiment === 'Positive') {\n    positive++;\n  } else if (sentiment === 'Negative') {\n    negative++;\n  } else if (sentiment === 'Neutral') {\n    neutral++;\n  }\n}\n\ntotal = items.length;\n\n// Kembalikan hasil perhitungan\nreturn {\n  total_tweets: total,\n  sentimen_positif: positive,\n  sentimen_negatif: negative,\n  sentimen_netral: neutral\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        432
+      ],
+      "id": "43e217ab-974c-4be2-a18e-3312ce812eed",
+      "name": "Analisis Data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Anda adalah seorang analis sentimen media sosial.\nTuliskan kesimpulan singkat (dalam bahasa Indonesia) untuk laporan Telegram, berdasarkan data berikut:\n\n- Total Tweet Dianalisis: {{ $json.total_tweets }}\n- Sentimen Positif: {{ $json.sentimen_positif }}\n- Sentimen Negatif: {{ $json.sentimen_negatif }}\n- Sentimen Netral: {{ $json.sentimen_netral }}\n\nBerikan ringkasan singkat tentang apa arti angka-angka ini (misalnya, \"Sentimen hari ini cenderung positif,\" \"Ada banyak keraguan di pasar,\" dll.).\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        208,
+        432
+      ],
+      "id": "443d53dd-2843-4f67-9810-cdf996e320eb",
+      "name": "Membuat Kesimpulan"
+    },
+    {
+      "parameters": {
+        "chatId": "1758701386",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        432
+      ],
+      "id": "c7a176e4-7707-41af-bef9-4722b91c31d8",
+      "name": "Kirim Laporan",
+      "webhookId": "3f06b4f4-1352-4e25-b215-80fbec87770a",
+      "credentials": {
+        "telegramApi": {
+          "id": "kWOzWu1RYMmGJNVs",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "xiaomi/mimo-v2-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        208,
+        288
+      ],
+      "id": "5ade59cf-1f0d-4640-9aa8-763c0456d380",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "gXP8wizmYZb95bZl",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Analisis Sentimen": {
+      "main": [
+        [
+          {
+            "node": "Penyimpanan Hasil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Analisis Sentimen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analisis Sentimen",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiap jam 7 pagi": {
+      "main": [
+        [
+          {
+            "node": "Baca Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baca Data": {
+      "main": [
+        [
+          {
+            "node": "Analisis Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analisis Data": {
+      "main": [
+        [
+          {
+            "node": "Membuat Kesimpulan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Membuat Kesimpulan": {
+      "main": [
+        [
+          {
+            "node": "Kirim Laporan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Membuat Kesimpulan",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "availableInMCP": false
+  },
+  "versionId": "2cc15033-892a-42a0-824c-00b24c37e5f4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1b1dd58ee2ed3ec58599a56b628cfdf30aa70f1e4cc70b047799ef1650afe0eb"
+  },
+  "id": "a54pJx2PXfIcdzG6",
+  "tags": []
+}
